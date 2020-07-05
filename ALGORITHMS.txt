@@ -1,0 +1,400 @@
+//Set-PSReadlineOption -HistoryNoDuplicates
+//Remove-Item (Get-PSReadlineOption).HistorySavePath
+
+segment_tree_node * root = create_segment_tree(0,n-1,vec);
+struct segment_tree_node
+{
+    int lower_index,upper_index,val;
+    struct segment_tree_node *left,*right;
+};
+
+segment_tree_node * create_segment_tree(int l,int r,vi &vec)
+{
+    segment_tree_node * temp = new segment_tree_node;
+    if(l == r)
+    {
+        temp->lower_index = temp->upper_index = l;
+        temp->left = temp->right = nullptr;
+        temp->val = vec.at(l);
+    }
+    else
+    {
+        temp->lower_index = l;
+        temp->upper_index = r;
+        int mid = (l + r) / 2;
+        temp->left = create_segment_tree(l,mid,vec);
+        temp->right = create_segment_tree(mid + 1,r,vec);
+        temp->val = temp->left->val + temp->right->val;
+    }
+    return temp;
+}
+
+int range_query(int l,int r,segment_tree_node * root)
+{
+    if(root->lower_index > r || root->upper_index < l)
+    return 0;
+    if(root->lower_index >= l && root->upper_index <= r)
+    return root->val;
+    return range_query(l,r,root->left) + range_query(l,r,root->right);
+}
+
+segment_tree_node * update(int index,int val,segment_tree_node * root)
+{
+    root->val += val;
+    if(root->lower_index != root->upper_index)
+    {
+        if(index >= root->left->lower_index && index <= root->left->upper_index)
+        root->left = update(index,val,root->left);
+        else
+        root->right = update(index,val,root->right);
+    }
+    return root;
+}
+
+void input_graph(vvi &graph)
+{
+    int m;
+    cin>>m;
+    while(m--)
+    {
+        int a,b;
+        cin>>a>>b;
+        graph[a].push_back(b);
+        graph[b].push_back(a);
+    }
+}
+
+
+string ADD(string &a,string &b,int base)
+{
+    string A,B,result;
+    if(a.length() > b.length())
+    {
+        A = a;
+        B = b;
+    }
+    else
+    {
+        A = b;
+        B = a;
+    }
+    reverse(A.begin(),A.end());
+    reverse(B.begin(),B.end());
+    int carry = 0;
+    for(int i = 0; A[i]; ++i)
+    if(B[i] == '\0')
+    {
+        while(A[i])
+        {
+            int a = A[i] - '0';
+            int sum = a + carry;
+            result.push_back(sum % base + '0');
+            carry = sum / base;
+            i++;    
+        }
+        break;
+    }
+    else
+    {
+        int a = A[i] - '0';
+        int b = B[i] - '0';
+        int sum = a + b + carry;
+        result.push_back(sum % base + '0');
+        carry = sum / base;
+    }
+    if(carry > 0)
+    result.push_back(carry + '0');
+    reverse(result.begin(),result.end());
+    return result;
+}
+
+
+int remaining_suffix_count,active_edge,active_length,global_end = -1;
+
+
+struct node
+{
+    int start_index,end_index;
+    struct node *suffix_link = root;
+    map<char, struct node *> mp;
+    node(int i)
+    {
+        start_index = i;
+    }
+};
+
+node *root = new node;
+node *active_node = root;
+
+
+        string str;
+        cin>>str;
+        for(int i = 0; str[i]; ++i)
+        {
+            remaining_suffix_count++;
+            global_end++;
+            while(remaining_suffix_count > 0)
+            {
+                if(active_length == 0)
+                {
+                    active_edge = i;
+                    if(active_node->mp[str[active_edge]] == nullptr)
+                    {
+                        active_node->mp[str[active_edge]] = new node(i);
+
+                    }
+                    else
+                    {
+                        active_length++;
+                    }
+                }
+                else
+                {
+
+                }
+            }
+        }
+
+
+
+
+
+void sieve_of_eratosthenes()
+{
+    vb prime(1000001,true);
+    prime[1] = false;
+    for(int p = 2; p <= 1000; ++p)
+    {
+        if(!prime.at(p))
+        continue;
+        for(int q = p * p; q <= 1000000; q += p)
+        prime.at(q) = false;
+    }
+}
+
+
+
+struct node
+{
+    int start_index,end_index;
+    struct node *suffix_link;
+    map<char, struct node *> mp;
+};
+node *root = new node;
+node *active_node = root;
+int remaining_suffix_count,active_edge,active_length,global_end = -1;
+
+
+#include<stdio.h>
+
+void Merge(int *ptr,int *left,int *right,int left_size,int right_size)
+{
+    int le = 0, ri = 0,i;
+    for(i = 0; i < left_size + right_size; i++)
+    if( left[le] < right[ri])
+    {
+        ptr[i] = left[le];
+        le++;
+        if(le == left_size)
+        {
+            while(ri != right_size)
+            {
+                ptr[++i] = right[ri++];
+            }
+            break;                                     
+        } 
+    }
+    else
+    {
+        ptr[i] = right[ri];
+        ri++;
+        if(ri == right_size)
+        {
+            while(le != left_size)
+            {
+                ptr[++i] = left[le++];
+            }
+            break;
+        }
+    }
+}
+void Mergesort(int *ptr,int l,int r)
+{
+    if(l == r)
+        return;
+        int i;
+    int left[(l+r)/2+1];
+    int right[r-(l+r)/2];
+    for(i = 0; i < (l+r)/2 + 1; i++)
+    left[i] = ptr[i];                         
+    for(i = (l+r)/2 + 1; i <= r ; i++)
+    right[i-1-(l+r/2)] = ptr[i];
+    Mergesort(left,0,(l+r)/2);
+    Mergesort(right,0,r-(l+r)/2-1);
+    Merge(ptr,left,right,(l+r)/2 + 1,r-(l+r)/2);
+}
+int main()
+{
+    int n,i;
+    printf("Enter the size of array");
+    scanf("%d",&n);
+    printf("Enter elements in array");
+    int arr[n];
+    for(i = 0; i < n; i++)
+    scanf("%d",&arr[i]);
+    printf("\nBefore sorting elements are");
+    for(i = 0; i < n; ++i)
+    printf("%d ",arr[i]);
+    Mergesort(arr,0,n-1);                           
+    printf("\nafter sorting elements are");
+    for(i = 0; i < n; ++i)
+    printf("%d ",arr[i]);
+    return 0;
+}
+
+
+
+
+
+ll modular_exponentiation(ll a,ll p)
+{
+    if(p == 0)
+    return 1;
+    if(p & 1)
+    return (a % inf * (modular_exponentiation(((a % inf) * (a % inf)) % inf,p>>1)) % inf) % inf;
+    else
+    return modular_exponentiation(((a % inf) * (a % inf)) % inf,p>>1) % inf;
+}
+
+
+void dfs(int src,vvi &graph,vb &visited)
+{
+    visited[src] = true;
+    f(i,0,graph[src].size())
+    if(!visited[graph[src][i]])
+    dfs(graph[src][i],graph,visited);
+}
+
+
+void update_BIT(vi &BIT,int index,int val,int n)
+{
+    while(index <= n)
+    {
+        BIT[index] += val;
+        index += (index & -index);
+    }
+}
+
+
+ll get_sum_BIT(vi &BIT,int index)
+{
+    ll sum = 0;
+    while(index)
+    {
+        sum += BIT[index];
+        index -= (index & -index);
+    }
+    return sum;
+}
+
+
+
+
+int root_DSU(vi &arr,int i)
+{
+    while(arr[i] != i)
+    {
+        arr[i] = arr[arr[i]];
+        i = arr[i];
+    }
+    return i;
+}
+
+
+
+void union_operation_DSU(vi &arr,vi &size,int u,int v)
+{
+    int root_u = root_DSU(arr,u);
+    int root_v = root_DSU(arr,v);
+    if(root_u == root_v)
+    return;
+    if(size[root_u] < size[root_v])
+    {
+        arr[root_u] = root_v;
+        size[root_v] += size[root_u];
+    }
+    else
+    {
+        arr[root_v] = root_u;
+        size[root_u] += size[root_v];
+    }
+}
+
+
+
+
+
+//trie * root = new trie();
+typedef struct trie
+{
+    map<char, struct trie *> mp;
+    bool isEndOfWord = false;
+}trie;
+
+trie * delete_trie(trie * root,string &str,int i)
+{
+    if(str[i] == '\0')
+    {
+        root->isEndOfWord = false;
+        if((root->mp).size() == 0)
+        {
+            delete root;
+            return nullptr;
+        }
+        else
+        return root;
+    }
+    if((root->mp).find(str[i]) == (root->mp).end())
+    return root;
+    else
+    {
+        (root->mp)[str[i]] = del((root->mp)[str[i]],str,i+1);
+        if((root->mp)[str[i]] == nullptr)
+        {
+            (root->mp).erase(str[i]);
+            if((root->mp).size() == 0 && i != 0)
+            {
+                delete root;
+                return nullptr;
+            }
+            else
+            return root;
+        }
+        else
+        return root;
+    }
+}
+
+bool found_trie(trie * root,string &str)
+{
+    trie * temp = root;
+    for(char ch:str)
+    {
+        if((temp->mp).find(ch) == (temp->mp).end())
+        return false;
+        temp = (temp->mp)[ch];  
+    }
+    return temp->isEndOfWord == true;
+}
+
+void insert_trie(trie * root,string &str)
+{
+    trie * temp = root;
+    for(char ch:str)
+    {
+        if((temp->mp).find(ch) == (temp->mp).end())
+        (temp->mp).insert({ch,new trie()});
+        temp = (temp->mp)[ch];
+    }
+    temp->isEndOfWord = true;
+}
